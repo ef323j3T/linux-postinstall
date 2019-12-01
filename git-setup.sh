@@ -32,7 +32,6 @@ clean() {
     rm ${HOME}/.wget_hosts
     rm ${HOME}/.viminfo
     rm ${HOME}/.zcompdump
-    rm ${HOME}/git-setup.sh
     rm ${HOME}/.zshrc ; }
     
 deploy_dotfiles() {
