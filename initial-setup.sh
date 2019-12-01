@@ -121,7 +121,7 @@ function promptForPassword() {
    done ; }
 
 
-main() {
+run_main() {
     	read -rp "Enter the username of the new user account:" username
     	promptForPassword
     	read -rp "Enter the mail of git account:" gitmail
@@ -136,37 +136,45 @@ main() {
     	disableSudoPassword "${username}"
     	addSSHKey "${username}" "${sshKey}" ; }
 
-ntp() {
+run_time() {
     	setupTimezone
  	echo "Installing Network Time Protocol... " >&3
     	configureNTP ; }
 
-fins() {
+run_clean() {
 	sudo service ssh restart
    	cleanup
-   	echo "Setup Done! Log file is located at ${output_file}" >&3  ; }
+   	echo "Setup Done!"
+	rm $output_file ; }
 
-fix(){
 
-        if [ -z "${username}" ] ; then
-                read -rp "Enter the username of the new user account:" username
+run_fix(){
+	#if $username var isn't defined run prompt
+        if [ -z "${username}" ] ; then		
+	        read -rp "Enter the username of the new user account:" username
         fi
+	#add $username to sudo
+	adduser ${username} sudo		
 	
-	adduser ${username} sudo
-
+	#check git-setup.sh exists in $username home folder
         if [ ! -f /home/${username}/git-setup.sh ] ; then
 		execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
         fi
-        execAsUser ${username} "sudo chsh -s $(which zsh)"
-        execAsUser ${username} "touch ~/.zshrc"
-        su ${username}
-}
+	
+	#changee default shell
+	usermod -s /usr/bin/zsh ${username}
+        execAsUser ${username} "chsh -s $(which zsh)"
+        
+	cd /home/${username}
+	touch /home/${username}/.zshrc
+
+	su ${username} ; }
 
 
 update_ubuntu
 install_tools
-main
-ntp
-fins
-fix
+run_main
+run_time
+run_clean
+run_fix
 
