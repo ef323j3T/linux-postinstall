@@ -26,6 +26,14 @@ check_git() {
     fi
 }
 
+clean() {
+    rm ${HOME}/.bash*
+    rm ${HOME}/.profile
+    rm ${HOME}/.wget_hosts
+    rm ${HOME}/.viminfo
+    rm ${HOME}/.zcompdump
+}
+
 deploy_dotfiles() {
     if [ ! -f /${HOME}/.local/dotfiles/deploy.zsh ] ; then
         git clone git@github.com:ef323j3T/d0tfiles.git "${HOME}/.local/dotfiles"
