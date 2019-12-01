@@ -20,7 +20,7 @@ update_ubuntu(){
 install_tools(){
         clear
         print_status "Install Tools"
-        apt-get -y  install git vim nano make gcc curl wget net-tools zsh ; }
+        apt-get -y  install build-essential git vim nano make perl gcc curl wget net-tools zsh ; }
 
 
 function addUserAccount() {
@@ -151,10 +151,16 @@ fix(){
         if [ -z "${username}" ] ; then
                 read -rp "Enter the username of the new user account:" username
         fi
-        adduser ${username} sudo
-        execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
+	
+	adduser ${username} sudo
+
+        if [ ! -f /home/${username}/git-setup.sh ] ; then
+		execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
+        fi
         execAsUser ${username} "sudo chsh -s $(which zsh)"
-        su ${username} ; }
+        execAsUser ${username} "touch ~/.zshrc"
+        su ${username}
+}
 
 
 update_ubuntu
