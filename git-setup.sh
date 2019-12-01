@@ -26,6 +26,19 @@ check_git() {
     fi
 }
 
+deploy_dotfiles() {
+    if [ ! -f /${HOME}/.local/dotfiles/deploy.zsh ] ; then
+        git clone git@github.com:ef323j3T/d0tfiles.git "${HOME}/.local/dotfiles"
+    fi
+    echo "Deploy dotfiles?"
+    select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) ${HOME}/.local/dotfiles/deploy.zsh ;;
+        No ) exit ;;
+    esac
+    done
+}
 
 git_key
 check_git
+deploy_dotfiles
