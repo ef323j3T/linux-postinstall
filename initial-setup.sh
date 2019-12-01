@@ -50,16 +50,12 @@ function addSSHKey() {
     	execAsUser "${username}" "chmod 600 ~/.ssh/authorized_keys"
     	execAsUser "${username}" "ssh-keygen -t rsa -b 4096 -C '${GITMAIL}' -N '' -f ~/.ssh/id_rsa" ; }
 
+
 function execAsUser() {
 # Execute a command as a certain user. Args: 'username', 'command to be executed'
     	local username=${1}
     	local exec_command=${2}
     	sudo -u "${username}" -H bash -c "${exec_command}" ; }
-
-function changeSSHConfig() { 
-# Modify the sshd_config file. shellcheck disable=2116
-    	sudo sed -re 's/^(\#?)(PasswordAuthentication)([[:space:]]+)yes/\2\3no/' -i."$(echo 'old')" /etc/ssh/sshd_config
-    	sudo sed -re 's/^(\#?)(PermitRootLogin)([[:space:]]+)(.*)/PermitRootLogin no/' -i /etc/ssh/sshd_config ; }
 
 
 function setTimezone() {
@@ -68,8 +64,8 @@ function setTimezone() {
     	echo "${1}" | sudo tee /etc/timezone
     	sudo ln -fs "/usr/share/zoneinfo/${timezone}" /etc/localtime
     	sudo dpkg-reconfigure -f noninteractive tzdata ; }
-        
-        
+       
+       
 function configureNTP() { 
 # Configure Network Time Protocol
     	sudo apt-get update
@@ -88,6 +84,7 @@ function revertSudoers() {
     	sudo cp /etc/sudoers.bak /etc/sudoers
     	sudo rm -rf /etc/sudoers.bak ; }
 
+
 function cleanup() {
     if [[ -f "/etc/sudoers.bak" ]]; then
         revertSudoers
@@ -101,10 +98,12 @@ function logTimestamp() {
         echo "==================="
     } >>"${filename}" 2>&1 ; }
 
+
 function setupTimezone() {
     timezone="Australia/Sydney"
     setTimezone "${timezone}"
     echo "Timezone is set to $(cat /etc/timezone)" >&3 ; }
+
 
 function promptForPassword() {
 #Keep prompting for the password and password confirmation
@@ -136,7 +135,6 @@ function main() {
     	exec 3>&1 >>"${output_file}" 2>&1
     	disableSudoPassword "${username}"
     	addSSHKey "${username}" "${sshKey}"
-    	changeSSHConfig
 
     	setupTimezone
  	echo "Installing Network Time Protocol... " >&3
@@ -145,9 +143,11 @@ function main() {
     	sudo service ssh restart
    	cleanup
    	echo "Setup Done! Log file is located at ${output_file}" >&3 
-	
+
+	execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
+	execAsUser ${username} "sudo chsh -s $(which zsh)"
 	su ${username}
-	; }
+}
 
 update_ubuntu
 install_tools
