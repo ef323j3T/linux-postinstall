@@ -121,7 +121,7 @@ function promptForPassword() {
    done ; }
 
 
-function main() {
+main() {
     	read -rp "Enter the username of the new user account:" username
     	promptForPassword
     	read -rp "Enter the mail of git account:" gitmail
@@ -134,22 +134,33 @@ function main() {
 
     	exec 3>&1 >>"${output_file}" 2>&1
     	disableSudoPassword "${username}"
-    	addSSHKey "${username}" "${sshKey}"
+    	addSSHKey "${username}" "${sshKey}" ; }
 
+ntp() {
     	setupTimezone
  	echo "Installing Network Time Protocol... " >&3
-    	configureNTP
+    	configureNTP ; }
 
-    	sudo service ssh restart
+fins() {
+	sudo service ssh restart
    	cleanup
-   	echo "Setup Done! Log file is located at ${output_file}" >&3 
+   	echo "Setup Done! Log file is located at ${output_file}" >&3  ; }
 
-	execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
-	execAsUser ${username} "sudo chsh -s $(which zsh)"
-	su ${username}
-}
+fix(){
+
+        if [ -z "${username}" ] ; then
+                read -rp "Enter the username of the new user account:" username
+        fi
+        adduser ${username} sudo
+        execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
+        execAsUser ${username} "sudo chsh -s $(which zsh)"
+        su ${username} ; }
+
 
 update_ubuntu
 install_tools
 main
+ntp
+fins
+fix
 
