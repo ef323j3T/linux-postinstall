@@ -15,16 +15,15 @@ git_key() {
     
     curl -u "${gitUser}:${gitPass}" \
     --data "{\"title\":\"$title\",\"key\":\"$key_data\"}" \
-    https://api.github.com/user/keys
-}
+    https://api.github.com/user/keys ; }
 
 
 check_git() {
     ssh -T git@github.com 2>&1 | grep "success"
     if [[ $? -ne 0 ]] ; then
         echo "error. "
-    fi
-}
+    fi ; }
+
 
 clean() {
     rm ${HOME}/.bash*
@@ -33,6 +32,7 @@ clean() {
     rm ${HOME}/.viminfo
     rm ${HOME}/.zcompdump
     rm ${HOME}/.zshrc ; }
+    
     
 deploy_dotfiles() {
     if [ ! -f ${HOME}/.local/dotfiles/deploy.zsh ] ; then
@@ -45,6 +45,7 @@ deploy_dotfiles() {
         No ) exit ;;
     esac
     done ; }
+    
     
 clean_dotfiles () {    
     if [ "$OSTYPE" -ne "darwin" ] ; then
@@ -63,8 +64,7 @@ install_base_packages() {
         tk-dev tmux xz-utils zlib1g-dev zip unzip ; }
         
 install_more() {
-    cargo install exa
-}
+    cargo install exa ; }
 
 
 git_key
