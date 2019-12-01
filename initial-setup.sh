@@ -48,7 +48,7 @@ function addSSHKey() {
     	execAsUser "${username}" "mkdir -p ~/.ssh; chmod 700 ~/.ssh; touch ~/.ssh/authorized_keys"
     	execAsUser "${username}" "echo \"${sshKey}\" | sudo tee -a ~/.ssh/authorized_keys"
     	execAsUser "${username}" "chmod 600 ~/.ssh/authorized_keys"
-    	execAsUser "${username}" "ssh-keygen -t rsa -b 4096 -C '${GITMAIL}' -N '' -f ~/.ssh/id_rsa"
+    	execAsUser "${username}" "ssh-keygen -t rsa -b 4096 -C '${GITMAIL}' -N '' -f ~/.ssh/id_rsa" ; }
 
 function execAsUser() {
 # Execute a command as a certain user. Args: 'username', 'command to be executed'
@@ -73,7 +73,7 @@ function setTimezone() {
 function configureNTP() { 
 # Configure Network Time Protocol
     	sudo apt-get update
-    	sudo apt-get --assume-yes install ntp ;}
+    	sudo apt-get --assume-yes install ntp ; }
 
 
 function disableSudoPassword() { 
@@ -144,8 +144,7 @@ function main() {
 
     	sudo service ssh restart
    	cleanup
-   	echo "Setup Done! Log file is located at ${output_file}" >&3
-}
+   	echo "Setup Done! Log file is located at ${output_file}" >&3 ; }
 
 update_ubuntu
 install_tools
