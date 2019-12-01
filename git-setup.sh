@@ -6,8 +6,6 @@ set -e
 #https://github.com/b4b4r07/ssh-keyreg/blob/master/bin/ssh-keyreg
 #https://github.com/ABCanG/add-sshkey-remote
 
-sudo chsh -s $(which zsh)
-
 output_file="output.log"
 source "git.conf"
 
