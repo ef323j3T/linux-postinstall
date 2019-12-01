@@ -33,11 +33,10 @@ clean() {
     rm ${HOME}/.viminfo
     rm ${HOME}/.zcompdump
     rm ${HOME}/git-setup.sh
-    rm ${HOME}/.zshrc
-}
-
+    rm ${HOME}/.zshrc ; }
+    
 deploy_dotfiles() {
-    if [ ! -f /${HOME}/.local/dotfiles/deploy.zsh ] ; then
+    if [ ! -f ${HOME}/.local/dotfiles/deploy.zsh ] ; then
         git clone git@github.com:ef323j3T/d0tfiles.git "${HOME}/.local/dotfiles"
     fi
     echo "Deploy dotfiles?"
@@ -46,10 +45,33 @@ deploy_dotfiles() {
         Yes ) ${HOME}/.local/dotfiles/deploy.zsh ;;
         No ) exit ;;
     esac
-    done
+    done ; }
+    
+clean_dotfiles () {    
+    if [ "$OSTYPE" -ne "darwin" ] ; then
+        rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/chrome.zsh
+        rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/j=jump.zsh
+         rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/ff=find-fast.zsh
+    fi  ; }
+
+
+install_base_packages() {
+    sudo apt-get -y install apt-transport-https ca-certificates \
+        dirmngr dnsutils fd-find lsb-release less llvm liblzma-dev libffi-dev \
+        libncurses5-dev libncursesw5-dev libssl-dev libbz2-dev libreadline-dev libsqlite3-dev \
+        "make" openssh-client perl python-openssl \
+        silversearcher-ag software-properties-common snapd \
+        tk-dev tmux xz-utils zlib1g-dev zip unzip ; }
+        
+install_more() {
+    cargo install exa
 }
+
 
 git_key
 check_git
 clean
 deploy_dotfiles
+clean_dotfiles
+install_base_packages
+install_more
