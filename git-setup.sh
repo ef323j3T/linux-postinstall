@@ -6,16 +6,12 @@ set -e
 #https://github.com/b4b4r07/ssh-keyreg/blob/master/bin/ssh-keyreg
 #https://github.com/ABCanG/add-sshkey-remote
 
-output_file="output.log"
-source "git.conf"
-
-print_status() { echo "$1" ; }
-
 git_key() {
     title="${USER}@${HOSTNAME}"
     key_data="$(cat ~/.ssh/id_rsa.pub)"
     
-    ssh-keygen -t rsa -b 4096 -C "$gitMail"
+   	read -rp "Enter the username of git account:" gitUser
+   	read -s -rp "Enter the password of git account:" gitPass
     
     curl -u "${gitUser}:${gitPass}" \
     --data "{\"title\":\"$title\",\"key\":\"$key_data\"}" \
