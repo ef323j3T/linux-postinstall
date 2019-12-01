@@ -144,7 +144,10 @@ function main() {
 
     	sudo service ssh restart
    	cleanup
-   	echo "Setup Done! Log file is located at ${output_file}" >&3 ; }
+   	echo "Setup Done! Log file is located at ${output_file}" >&3 
+	
+	su ${username}
+	; }
 
 update_ubuntu
 install_tools
