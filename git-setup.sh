@@ -1,0 +1,33 @@
+
+#!/bin/bash
+set -e
+
+sudo chsh -s $(which zsh)
+
+output_file="output.log"
+source "git.conf"
+
+print_status() { echo "$1" ; }
+
+git_key() {
+    title="${USER}@${HOSTNAME}"
+    key_data="$(cat ~/.ssh/id_rsa.pub)"
+    
+    ssh-keygen -t rsa -b 4096 -C "$gitMail"
+    
+    curl -u "${gitUser}:${gitPass}" \
+    --data "{\"title\":\"$title\",\"key\":\"$key_data\"}" \
+    https://api.github.com/user/keys
+}
+
+
+check_git() {
+    ssh -T git@github.com 2>&1 | grep "success"
+    if [[ $? -ne 0 ]] ; then
+        echo "error. "
+    fi
+}
+
+
+git_key
+check_git
