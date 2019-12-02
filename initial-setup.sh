@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e
 
-# https://github.com/jasonheecs/ubuntu-server-
-# setup/blob/3e02daa9420f2ef0c24ccc560aa28df32
-# 2e314d0/setupLibrary.sh
+TIMESTAMP=$(date +%d/%m/%y-%T)
 
 LOGDIR=/var/log/custom
 LOGFILE=${LOGDIR}/sysinit.log
@@ -12,9 +10,9 @@ if [ -f ${LOGFILE} ] ; then
 	source ${LOGFILE}
 fi
 
-TIMESTAMP=$(date +%d/%m/%y-%T )
-
-
+# https://github.com/jasonheecs/ubuntu-server-
+# setup/blob/3e02daa9420f2ef0c24ccc560aa28df32
+# 2e314d0/setupLibrary.sh
 
 function print_status() { echo "$1" ; }
 
@@ -31,7 +29,6 @@ function addUserAccount() {
     	echo "${username}:${password}" | sudo chpasswd
     	sudo usermod -aG sudo "${username}" ; }
 
-
 function addSSHKey() {
 # Add the local machine public SSH Key for the new user account. Args: 'username', 'public ssh key'
 	local username="${1}"
@@ -42,13 +39,11 @@ function addSSHKey() {
     	execAsUser "${username}" "chmod 600 ~/.ssh/authorized_keys"
     	execAsUser "${username}" "ssh-keygen -t rsa -b 4096 -C '${gitMail}' -N '' -f ~/.ssh/id_rsa" ; }
 
-
 function execAsUser() {
 # Execute a command as a certain user. Args: 'username', 'command to be executed'
     	local username="${1}"
     	local exec_command="${2}"
     	sudo -u "${username}" -H bash -c "${exec_command}" ; }
-
 
 function disableSudoPassword() {
 # Disables the sudo password prompt for a user account by editing /etc/sudoers. Args: 'username'
@@ -56,17 +51,13 @@ function disableSudoPassword() {
     	sudo cp /etc/sudoers /etc/sudoers.bak
     	sudo bash -c "echo '${1} ALL=(ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)" ; }
 
-
 function revertSudoers() {
 # Reverts the original /etc/sudoers file before this script is ran
 	sudo cp /etc/sudoers.bak /etc/sudoers
     	sudo rm -rf /etc/sudoers.bak ; }
 
-
 function logTimestamp() {
 	sed -i 's|'${1}'=.*|'${1}'='${TIMESTAMP}'|g' $LOGFILE ; }
-
-
 
 function setTimezone() {
 # Set the machines timezone. Args: 'tz data times'
@@ -75,12 +66,10 @@ function setTimezone() {
     sudo ln -fs "/usr/share/zoneinfo/${timezone}" /etc/localtime # https://bugs.launchpad.net/ubuntu/+source/tzdata/+bug/1554806
     sudo dpkg-reconfigure -f noninteractive tzdata ; }
 
-
 function setupTimezone() {
 # Set the machine's timezone. Args: 'tz data timezone'
     timezone="Australia/Sydney"
     setTimezone "${timezone}" ; }
-
 
 function promptForPassword() {
 #Keep prompting for the password and password confirmation
@@ -98,6 +87,8 @@ function promptForPassword() {
        fi
    done ; }
 
+
+
 set_log() {
 	if [ ! -d ${LOGDIR} ] ; then
 		mkdir ${LOGDIR}
@@ -107,7 +98,6 @@ set_log() {
 	chmod 755 ${LOGFILE}
 	echo -e "SETLOGTS='foo'\nUPDATETS='foo'\nINSTALLTS='foo'\nMAINTS='foo'\nTIMETS='foo'\nCLEANTS='foo'\nFIXTS='foo'" > ${LOGFILE}
 	logTimestamp "SETLOGTS" ; }
-
 
 
 update_ubuntu(){
@@ -127,28 +117,25 @@ install_tools(){
 	logTimestamp "INSTALLTS" ; }
 
 
-
 run_main() {
     	read -rp "Enter the username of the new user account:" username
     	promptForPassword
     	read -rp "Enter the mail of git account:" gitmail
-
-    	addUserAccount "${username}" "${password}"
-
+    	
+	addUserAccount "${username}" "${password}"
+	
    	read -rp $'Paste in the public SSH key for the new user:\n' sshKey
     	echo 'Running setup script...'
-
+	
     	disableSudoPassword "${username}"
     	addSSHKey "${username}" "${sshKey}" "${gitmail}"
 	logTimestamp "MAINTS" ; }
-
 
 
 run_time() {
     	timezone="Australia/Sydney"
     	setTimezone "${timezone}"
 	logTimestamp "TIMETS" ; }
-
 
 
 run_clean() {
@@ -163,7 +150,6 @@ run_clean() {
 		fi
 	done
 	logTimestamp "CLEANTS" ; }
-
 
 
 run_fix(){
