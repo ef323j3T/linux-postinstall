@@ -194,8 +194,8 @@ run_fix(){
 
 
 set_log
-#update_ubuntu
-#install_tools
+update_ubuntu
+install_tools
 run_main
 run_time
 run_clean
