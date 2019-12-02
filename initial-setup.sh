@@ -160,24 +160,12 @@ run_fix(){
 	su ${username} ; }
 
 
-confirm() {
-   	 # call with a prompt string or use a default
-    	read -r -p "${1:-Continue? [y/N]} " response
-    	case "$response" in
-       		[yY][eE][sS]|[yY]) 
-            		true
-           		;;
-       		*)
-            		false
-            		;;
-    	esac ; }
-
 
 
 update_ubuntu
-confirm "Install packages" && install_tools
-confirm "Start create user" && run_main
-confirm "Setup NTP" && run_time
-confirm "Clean files" && run_clean
-confirm "Change default shell" && run_fix
+install_tools
+run_main
+run_time
+run_clean
+run_fix
 
