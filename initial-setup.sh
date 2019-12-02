@@ -7,10 +7,12 @@ set -e
 
 LOGDIR=/opt/log/custom
 LOGFILE=${LOGDIR}/sysinit.log
-
 source ${LOGFILE}
+TIMESTAMP=$(date +%d/%m/%y-%R )
 
-print_status() { echo "$1" ; }
+
+
+function print_status() { echo "$1" ; }
 
 function addUserAccount() {
 # Add the new user account. Args: 'Username', 'password'. Flag to determine if user account is added silently. (With / Without GECOS prompt)
@@ -24,7 +26,6 @@ function addUserAccount() {
     	fi
     	echo "${username}:${password}" | sudo chpasswd
     	sudo usermod -aG sudo "${username}" ; }
-
 
 function addSSHKey() {
 # Add the local machine public SSH Key for the new user account. Args: 'username', 'public ssh key'
@@ -59,15 +60,13 @@ function revertSudoers() {
     	sudo rm -rf /etc/sudoers.bak ; }
 
 function logTimestamp() {
-	sed -c -i "s/\(${ *= *\).*/\1$TIMESTAMP/" $LOGFILE ; }
-} 
+	sed -c -i "s/\(${1} *= *\).*/\1$TIMESTAMP/" $LOGFILE ; } ; } 
 
 function setupTimezone() {
 # Set the machine's timezone. Args: 'tz data timezone'
     timezone="Australia/Sydney"
     setTimezone "${timezone}"
     echo "Timezone is set to $(cat /etc/timezone)" >&3 ; }
-
 
 function promptForPassword() {
 #Keep prompting for the password and password confirmation
@@ -101,13 +100,11 @@ update_ubuntu(){
         apt-get -y dist-upgrade 
 	logTimestamp '$UPDATETS' ; }
 
-
 install_tools(){
         clear
         print_status "Install Tools"
         apt-get -y  install build-essential git vim nano make perl gcc curl wget net-tools zsh 
 	logTimestamp '$INSTALLTS' ; }
-
 
 run_main() {
     	read -rp "Enter the username of the new user account:" username
@@ -119,11 +116,9 @@ run_main() {
    	read -rp $'Paste in the public SSH key for the new user:\n' sshKey
     	echo 'Running setup script...'
     	
-    	exec 3>&1 >>"${output_file}" 2>&1
     	disableSudoPassword "${username}"
     	addSSHKey "${username}" "${sshKey}" "${gitmail}"
 	logTimestamp '$MAINTS' ; }
-
 
 run_time() {
     	setupTimezone
@@ -135,7 +130,6 @@ run_time() {
 run_clean() {
 	sudo service ssh restart
    	echo "Setup Done!"
-	rm $output_file 
 	apt-get clean
         apt-get autoclean
         apt-get -y autoremove
@@ -146,27 +140,24 @@ run_clean() {
 
 
 run_fix(){
-	#if $username var isn't defined run prompt
+#if $username var isn't defined run prompt
         if [ -z "${username}" ] ; then		
 	        read -rp "Enter the username of the new user account:" username
         fi
-	#add $username to sudo
+#add $username to sudo
 	adduser ${username} sudo		
-	
-	#check git-setup.sh exists in $username home folder
+#check git-setup.sh exists in $username home folder
         if [ ! -f /home/${username}/git-setup.sh ] ; then
 		execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
-        fi
-	
-	#change default shell
+        fi	
+#change default shell
 	usermod -s /usr/bin/zsh ${username}
         execAsUser ${username} "chsh -s $(which zsh)"
-        
+#change to user
 	cd /home/${username}
 	touch /home/${username}/.zshrc
-	su ${username} 
-	logTimestamp '$FIXTS' ; }
-
+	logTimestamp '$FIXTS'
+	su ${username} ; }
 
 
 set_log
