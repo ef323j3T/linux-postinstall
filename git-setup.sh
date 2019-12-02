@@ -59,6 +59,7 @@ install_base_packages() {
     sudo apt-get -y install apt-transport-https ca-certificates \
         dirmngr dnsutils fd-find lsb-release less llvm liblzma-dev libffi-dev \
         libncurses5-dev libncursesw5-dev libssl-dev libbz2-dev libreadline-dev libsqlite3-dev \
+        libreadline-gplv2-dev libpam0g-dev \
         "make" openssh-client perl python-openssl \
         silversearcher-ag software-properties-common snapd \
         tk-dev tmux xz-utils zlib1g-dev zip unzip ; }
