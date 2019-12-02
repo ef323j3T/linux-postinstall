@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
-
+#
+#https://github.com/jasonheecs/ubuntu-server-setup/blob/3e02daa9420f2ef0c24ccc560aa28df322e314d0/setupLibrary.sh
+#
 output_file="output.log"
 
 print_status() { echo "$1" ; }
@@ -21,7 +23,6 @@ install_tools(){
         clear
         print_status "Install Tools"
         apt-get -y  install build-essential git vim nano make perl gcc curl wget net-tools zsh ; }
-
 
 function addUserAccount() {
 # Add the new user account. Args: 'Username', 'password'. Flag to determine if user account is added silently. (With / Without GECOS prompt)
@@ -56,15 +57,6 @@ function execAsUser() {
     	local username=${1}
     	local exec_command=${2}
     	sudo -u "${username}" -H bash -c "${exec_command}" ; }
-
-
-function setTimezone() {
-# Set the machines timezone. Args: 'tz data timezone'
-    	local timezone=${1}
-    	echo "${1}" | sudo tee /etc/timezone
-    	sudo ln -fs "/usr/share/zoneinfo/${timezone}" /etc/localtime
-    	sudo dpkg-reconfigure -f noninteractive tzdata ; }
-       
        
 function configureNTP() { 
 # Configure Network Time Protocol
@@ -78,17 +70,10 @@ function disableSudoPassword() {
     	sudo cp /etc/sudoers /etc/sudoers.bak
     	sudo bash -c "echo '${1} ALL=(ALL) NOPASSWD: ALL' | (EDITOR='tee -a' visudo)" ; }
 
-
 function revertSudoers() {
 # Reverts the original /etc/sudoers file before this script is ran
-    	sudo cp /etc/sudoers.bak /etc/sudoers
+	sudo cp /etc/sudoers.bak /etc/sudoers
     	sudo rm -rf /etc/sudoers.bak ; }
-
-
-function cleanup() {
-    if [[ -f "/etc/sudoers.bak" ]]; then
-        revertSudoers
-    fi ; }
 
 function logTimestamp() {
     local filename=${1}
@@ -100,6 +85,7 @@ function logTimestamp() {
 
 
 function setupTimezone() {
+# Set the machine's timezone. Args: 'tz data timezone'
     timezone="Australia/Sydney"
     setTimezone "${timezone}"
     echo "Timezone is set to $(cat /etc/timezone)" >&3 ; }
@@ -143,7 +129,6 @@ run_time() {
 
 run_clean() {
 	sudo service ssh restart
-   	cleanup
    	echo "Setup Done!"
 	rm $output_file ; }
 
