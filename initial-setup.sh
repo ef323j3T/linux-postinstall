@@ -5,6 +5,7 @@ set -e
 #
 output_file="output.log"
 
+
 print_status() { echo "$1" ; }
 
 update_ubuntu(){
@@ -13,10 +14,7 @@ update_ubuntu(){
         apt-get -y update
         apt-get -y update --fix-missing
         apt-get -y upgrade
-        apt-get -y dist-upgrade
-        apt-get clean
-        apt-get autoclean
-        apt-get -y autoremove ; }
+        apt-get -y dist-upgrade ; }
 
 
 install_tools(){
@@ -130,7 +128,13 @@ run_time() {
 run_clean() {
 	sudo service ssh restart
    	echo "Setup Done!"
-	rm $output_file ; }
+	rm $output_file 
+	apt-get clean
+        apt-get autoclean
+        apt-get -y autoremove
+	rm ~/.bash*
+	rm ~/.wget* 
+	rm ~/.profile ; }
 
 
 run_fix(){
@@ -156,10 +160,24 @@ run_fix(){
 	su ${username} ; }
 
 
+confirm() {
+   	 # call with a prompt string or use a default
+    	read -r -p "${1:-Continue? [y/N]} " response
+    	case "$response" in
+       		[yY][eE][sS]|[yY]) 
+            		true
+           		;;
+       		*)
+            		false
+            		;;
+    	esac ; }
+
+
+
 update_ubuntu
-install_tools
-run_main
-run_time
-run_clean
-run_fix
+confirm "Install packages" && install_tools
+confirm "Start create user" && run_main
+confirm "Setup NTP" && run_time
+confirm "Clean files" && run_clean
+confirm "Change default shell" && run_fix
 
