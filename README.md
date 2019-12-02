@@ -9,4 +9,4 @@ sudo chmod +x initial-setup.sh
  ```
 &nbsp;
 ```
-./git-setup.sh
+bash git-setup.sh
