@@ -1,26 +1,16 @@
 #!/bin/bash
 set -e
-#
-#https://github.com/jasonheecs/ubuntu-server-setup/blob/3e02daa9420f2ef0c24ccc560aa28df322e314d0/setupLibrary.sh
-#
-output_file="output.log"
 
+# https://github.com/jasonheecs/ubuntu-server-
+# setup/blob/3e02daa9420f2ef0c24ccc560aa28df32
+# 2e314d0/setupLibrary.sh
+
+LOGDIR=/opt/log/custom
+LOGFILE=${LOGDIR}/sysinit.log
+
+source ${LOGFILE}
 
 print_status() { echo "$1" ; }
-
-update_ubuntu(){
-        #clear
-        print_status "Updating Ubuntu"
-        apt-get -y update
-        apt-get -y update --fix-missing
-        apt-get -y upgrade
-        apt-get -y dist-upgrade ; }
-
-
-install_tools(){
-        clear
-        print_status "Install Tools"
-        apt-get -y  install build-essential git vim nano make perl gcc curl wget net-tools zsh ; }
 
 function addUserAccount() {
 # Add the new user account. Args: 'Username', 'password'. Flag to determine if user account is added silently. (With / Without GECOS prompt)
@@ -41,14 +31,10 @@ function addSSHKey() {
 	local username=${1}
     	local sshKey=${2}
     	local GITMAIL=${3}
-	local GITUSER=${4}
-	local GITPASS=${5}
-
     	execAsUser "${username}" "mkdir -p ~/.ssh; chmod 700 ~/.ssh; touch ~/.ssh/authorized_keys"
     	execAsUser "${username}" "echo \"${sshKey}\" | sudo tee -a ~/.ssh/authorized_keys"
     	execAsUser "${username}" "chmod 600 ~/.ssh/authorized_keys"
     	execAsUser "${username}" "ssh-keygen -t rsa -b 4096 -C '${GITMAIL}' -N '' -f ~/.ssh/id_rsa" ; }
-
 
 function execAsUser() {
 # Execute a command as a certain user. Args: 'username', 'command to be executed'
@@ -60,7 +46,6 @@ function configureNTP() {
 # Configure Network Time Protocol
     	sudo apt-get update
     	sudo apt-get --assume-yes install ntp ; }
-
 
 function disableSudoPassword() { 
 # Disables the sudo password prompt for a user account by editing /etc/sudoers. Args: 'username'
@@ -74,13 +59,8 @@ function revertSudoers() {
     	sudo rm -rf /etc/sudoers.bak ; }
 
 function logTimestamp() {
-    local filename=${1}
-    {
-        echo "==================="
-        echo "Log generated on $(date)"
-        echo "==================="
-    } >>"${filename}" 2>&1 ; }
-
+	sed -c -i "s/\(${ *= *\).*/\1$TIMESTAMP/" $LOGFILE ; }
+} 
 
 function setupTimezone() {
 # Set the machine's timezone. Args: 'tz data timezone'
@@ -104,6 +84,30 @@ function promptForPassword() {
        fi
    done ; }
 
+set_log() {
+	mkdir ${LOGDIR}
+	chmod -R 755 ${LOGDIR}
+	touch ${LOGFILE}
+	chmod 755 ${LOGFILE}
+	echo -e "SETLOGTS='foo'\nUPDATETS='foo'\nINSTALLTS='foo'\nMAINTS='foo'\nTIMETS='foo'\nCLEANTS='foo'\nFIXTS='foo'" > ${LOGFILE} 
+	logTimestamp '$SETLOGTS' ; }
+	
+update_ubuntu(){
+        #clear
+        print_status "Updating Ubuntu"
+        apt-get -y update
+        apt-get -y update --fix-missing
+        apt-get -y upgrade
+        apt-get -y dist-upgrade 
+	logTimestamp '$UPDATETS' ; }
+
+
+install_tools(){
+        clear
+        print_status "Install Tools"
+        apt-get -y  install build-essential git vim nano make perl gcc curl wget net-tools zsh 
+	logTimestamp '$INSTALLTS' ; }
+
 
 run_main() {
     	read -rp "Enter the username of the new user account:" username
@@ -114,16 +118,19 @@ run_main() {
 
    	read -rp $'Paste in the public SSH key for the new user:\n' sshKey
     	echo 'Running setup script...'
-    	logTimestamp "${output_file}"
-
+    	
     	exec 3>&1 >>"${output_file}" 2>&1
     	disableSudoPassword "${username}"
-    	addSSHKey "${username}" "${sshKey}" ; }
+    	addSSHKey "${username}" "${sshKey}" "${gitmail}"
+	logTimestamp '$MAINTS' ; }
+
 
 run_time() {
     	setupTimezone
  	echo "Installing Network Time Protocol... " >&3
-    	configureNTP ; }
+    	configureNTP 
+	logTimestamp 'TIMETS' ; }
+
 
 run_clean() {
 	sudo service ssh restart
@@ -134,7 +141,8 @@ run_clean() {
         apt-get -y autoremove
 	rm ~/.bash*
 	rm ~/.wget* 
-	rm ~/.profile ; }
+	rm ~/.profile 
+	logTimestamp '$CLEANTS'; }
 
 
 run_fix(){
@@ -150,18 +158,18 @@ run_fix(){
 		execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
         fi
 	
-	#changee default shell
+	#change default shell
 	usermod -s /usr/bin/zsh ${username}
         execAsUser ${username} "chsh -s $(which zsh)"
         
 	cd /home/${username}
 	touch /home/${username}/.zshrc
-
-	su ${username} ; }
-
-
+	su ${username} 
+	logTimestamp '$FIXTS' ; }
 
 
+
+set_log
 update_ubuntu
 install_tools
 run_main
