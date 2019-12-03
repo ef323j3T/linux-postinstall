@@ -18,7 +18,7 @@ git_key() {
     
     curl -u "${gitUser}:${gitPass}" \
     --data "{\"title\":\"$title\",\"key\":\"$key_data\"}" \
-    https://api.github.com/user/keys 
+    https://api.github.com/user/keys
     
     local GIT_USER_DIR=~/.config/git/local
     local GIT_USER_FILE=${GIT_USER_DIR}/user
@@ -34,13 +34,13 @@ check_git() {
 deploy_dotfiles() {
     if [ ! -f ${HOME}/.local/dotfiles/deploy.zsh ] ; then
         git clone git@github.com:ef323j3T/dotfiles.git "${HOME}/.local/dotfiles"
-    fi 
+    fi
     ./${HOME}.local/dotfiles/deploy.zsh ; }
 
-clean_dotfiles () {    
+clean_dotfiles () {
     if [ "$OSTYPE" -ne "darwin" ] ; then
         for files in "${MAC_ZSH_ARRAY[@]}" ; do
-            rm -f "$files" 
+            rm -f "$files"
         done
     fi  ; }
 
@@ -59,6 +59,6 @@ install_more() {
 git_key
 check_git
 deploy_dotfiles
-clean_dotfiles
+#clean_dotfiles
 install_packages
 #install_more
