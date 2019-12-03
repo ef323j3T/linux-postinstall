@@ -66,11 +66,6 @@ function setTimezone() {
     sudo ln -fs "/usr/share/zoneinfo/${timezone}" /etc/localtime # https://bugs.launchpad.net/ubuntu/+source/tzdata/+bug/1554806
     sudo dpkg-reconfigure -f noninteractive tzdata ; }
 
-function setupTimezone() {
-# Set the machine's timezone. Args: 'tz data timezone'
-    timezone="Australia/Sydney"
-    setTimezone "${timezone}" ; }
-
 function promptForPassword() {
 #Keep prompting for the password and password confirmation
    PASSWORDS_MATCH=0
@@ -87,8 +82,6 @@ function promptForPassword() {
        fi
    done ; }
 
-
-
 set_log() {
 	if [ ! -d ${LOGDIR} ] ; then
 		mkdir ${LOGDIR}
@@ -96,9 +89,8 @@ set_log() {
 	fi
 	touch ${LOGFILE}
 	chmod 755 ${LOGFILE}
-	echo -e "SETLOGTS='foo'\nUPDATETS='foo'\nINSTALLTS='foo'\nMAINTS='foo'\nTIMETS='foo'\nCLEANTS='foo'\nFIXTS='foo'" > ${LOGFILE}
+	echo -e "SETLOGTS='foo'\nUPDATETS=\nINSTALLTS=\nMAINTS=\nTIMETS=\nCLEANTS=\nFIXTS=" > ${LOGFILE}
 	logTimestamp "SETLOGTS" ; }
-
 
 update_ubuntu(){
         #clear
@@ -109,13 +101,11 @@ update_ubuntu(){
         apt-get -y dist-upgrade
 	logTimestamp "UPDATETS" ; }
 
-
 install_tools(){
         clear
         print_status "Install Tools"
-        apt-get -y  install build-essential git ntp vim nano make perl gcc curl wget net-tools zsh
+        apt-get -y  install build-essential git ntp vim nano make moreutils perl gcc curl wget net-tools zsh
 	logTimestamp "INSTALLTS" ; }
-
 
 run_main() {
     	read -rp "Enter the username of the new user account:" username
@@ -131,12 +121,10 @@ run_main() {
     	addSSHKey "${username}" "${sshKey}" "${gitmail}"
 	logTimestamp "MAINTS" ; }
 
-
 run_time() {
     	timezone="Australia/Sydney"
     	setTimezone "${timezone}"
 	logTimestamp "TIMETS" ; }
-
 
 run_clean() {
 	sudo service ssh restart
@@ -151,33 +139,29 @@ run_clean() {
 	done
 	logTimestamp "CLEANTS" ; }
 
-
 run_fix(){
 	#if $username var isn't defined run prompt
         if [ -z "${username}" ] ; then
 	        read -rp "Enter the username of the new user account:" username
         fi
-
+	
 	#add $username to sudo
 	adduser ${username} sudo
-
+	
 	#check git-setup.sh exists in $username home folder
         if [ ! -f /home/${username}/git-setup.sh ] ; then
 		execAsUser ${username} "wget https://github.com/ef323j3T/linux-postinstall/raw/master/git-setup.sh -P /home/${username} && chmod +x /home/${username}/git-setup.sh"
         fi
-
+	
 	#change default shell
 	usermod -s /usr/bin/zsh ${username}
         execAsUser ${username} "chsh -s $(which zsh)"
-
+	
 	#change to user
 	cd /home/${username}
 	touch /home/${username}/.zshrc
-
 	logTimestamp "FIXTS"
-
 	su ${username} ; }
-
 
 set_log
 update_ubuntu
@@ -186,4 +170,3 @@ run_main
 run_time
 run_clean
 run_fix
-
