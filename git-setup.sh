@@ -7,55 +7,44 @@ set -e
 #https://github.com/ABCanG/add-sshkey-remote
 
 git_key() {
-    title="${USER}@${HOSTNAME}"
-    key_data="$(cat ~/.ssh/id_rsa.pub)"
+    local title="${USER}@${HOSTNAME}"
+    local key_data="$(cat ~/.ssh/id_rsa.pub)"
     
    	read -rp "Enter the username of git account:" gitUser
    	read -s -rp "Enter the password of git account:" gitPass
     
     curl -u "${gitUser}:${gitPass}" \
     --data "{\"title\":\"$title\",\"key\":\"$key_data\"}" \
-    https://api.github.com/user/keys ; }
+    https://api.github.com/user/keys 
+    
+    local GIT_USER_DIR=~/.config/git/local
+    local GIT_USER_FILE=${GIT_USER_DIR}/user
+    mkdir -p ${GIT_USER_DIR} && touch ${GIT_USER_FILE}
+    echo -e  "[user]\n     email = $gitMail\n     name = $gitUser" >> ${GIT_USER_FILE} ; }
 
 
 check_git() {
     ssh -T git@github.com 2>&1 | grep "success"
     if [[ $? -ne 0 ]] ; then
-        echo "error. "
+        echo "error."
     fi ; }
 
 
-clean() {
-    rm ${HOME}/.bash*
-    rm ${HOME}/.profile
-    rm ${HOME}/.wget_hosts
-    rm ${HOME}/.viminfo
-    rm ${HOME}/.zcompdump
-    rm ${HOME}/.zshrc ; }
-    
-    
 deploy_dotfiles() {
     if [ ! -f ${HOME}/.local/dotfiles/deploy.zsh ] ; then
-        git clone git@github.com:ef323j3T/d0tfiles.git "${HOME}/.local/dotfiles"
-    fi
-    echo "Deploy dotfiles?"
-    select yn in "Yes" "No"; do
-    case $yn in
-        Yes ) ${HOME}/.local/dotfiles/deploy.zsh ;;
-        No ) exit ;;
-    esac
-    done ; }
-    
-    
+        git clone git@github.com:ef323j3T/dotfiles.git "${HOME}/.local/dotfiles"
+    fi ; }
+
+
 clean_dotfiles () {    
     if [ "$OSTYPE" -ne "darwin" ] ; then
         rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/chrome.zsh
         rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/j=jump.zsh
-         rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/ff=find-fast.zsh
+        rm ${HOME}/.local/dotfiles/zsh/zshrc.d/aliases/ff=find-fast.zsh
     fi  ; }
 
 
-install_base_packages() {
+install_packages() {
     sudo apt-get -y install apt-transport-https ca-certificates \
         dirmngr dnsutils fd-find lsb-release less llvm liblzma-dev libffi-dev \
         libncurses5-dev libncursesw5-dev libssl-dev libbz2-dev libreadline-dev libsqlite3-dev \
@@ -63,15 +52,13 @@ install_base_packages() {
         "make" openssh-client perl python-openssl \
         silversearcher-ag software-properties-common snapd \
         tk-dev tmux xz-utils zlib1g-dev zip unzip ; }
-        
+
 install_more() {
     cargo install exa ; }
 
-
 git_key
 check_git
-clean
 deploy_dotfiles
 clean_dotfiles
-install_base_packages
-install_more
+install_packages
+#install_more
