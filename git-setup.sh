@@ -6,6 +6,9 @@ set -e
 # https://github.com/b4b4r07/ssh-keyreg/blob/master/bin/ssh-keyreg
 # https://github.com/ABCanG/add-sshkey-remote
 
+export ZDOTDIR="$HOME/.local/dotfiles/zsh"
+
+
 git_key() {
     local title="${USER}@${HOSTNAME}"
     local key_data="$(cat ~/.ssh/id_rsa.pub)"
