@@ -1,13 +1,10 @@
 
 #!/bin/bash
 set -e
-
+ZDOTDIR="$HOME/.local/dotfiles/zsh"
 # http://unix.stackexchange.com/questions/136894/command-line-method-or-programmatically-add-ssh-key-to-github-com-user-account
 # https://github.com/b4b4r07/ssh-keyreg/blob/master/bin/ssh-keyreg
 # https://github.com/ABCanG/add-sshkey-remote
-
-export ZDOTDIR="$HOME/.local/dotfiles/zsh"
-
 
 git_key() {
     local title="${USER}@${HOSTNAME}"
