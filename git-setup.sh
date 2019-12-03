@@ -31,7 +31,8 @@ check_git() {
 deploy_dotfiles() {
     if [ ! -f ${HOME}/.local/dotfiles/deploy.zsh ] ; then
         git clone git@github.com:ef323j3T/dotfiles.git "${HOME}/.local/dotfiles"
-    fi ; }
+    fi 
+    ./${HOME}.local/dotfiles/deploy.zsh ; }
 
 clean_dotfiles () {    
     if [ "$OSTYPE" -ne "darwin" ] ; then
